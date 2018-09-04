@@ -1,43 +1,55 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var lessMiddleware = require('less-middleware');
-var logger = require('morgan');
+const express = require('express');
+const mysql = require('mysql');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const app = express();
 
-var app = express();
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hjs');
-
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(lessMiddleware(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
+var db = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'nodemysql'
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+// Connect
+db.connect((err) => {
+    if (err) throw err;
+    console.log("Connected to nodemysql...");
 });
 
-module.exports = app;
+// Create DB
+app.get('/createdb', (req, res) => {
+    let sql = 'CREATE DATABASE nodemysql';
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+        res.send('database created...');
+        console.log(req.params.name + " created...");
+    });
+});
+
+// Create table
+app.get('/createuserstable', (req, res) => {
+    let sql = 'CREATE TABLE users(id int AUTO_INCREMENT, name VARCHAR(255), PRIMARY KEY(id))';
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+        res.send('Users table created')
+    });
+});
+
+// Add user
+app.get('/adduser/:name', (req, res) => {
+    let post = {
+        name: req.params.name
+    };
+    let sql = 'INSERT INTO users SET ?';
+    db.query(sql, post, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+        res.send('User ' + req.params.name + ' added to db');
+    });
+});
+
+
+app.listen('3000', () => {
+    console.log("Server started on port 3000");
+});

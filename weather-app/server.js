@@ -1,3 +1,4 @@
+const dotenv = require('dotenv').config();
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -16,10 +17,11 @@ app.get('/', (req, res) => {
     });
 });
 
+// On click "Get Weather"-button
 app.post('/', (req, res) => {
     let position = req.body.position.split(',');
-    let lat = position[0];
-    let lon = position[1];
+    let lat = position[0].trim();
+    let lon = position[1].trim();
     console.log(position);
     let url = `https://opendata-download-metfcst.smhi.se/api/category/pmp2g/version/2/geotype/point/lon/${lon}/lat/${lat}/data.json`;
     console.log("request url= " + url);
@@ -31,7 +33,7 @@ app.post('/', (req, res) => {
             });
         } else {
             let weather = JSON.parse(body)
-            // console.log(weather);
+            console.log(weather);
             if (weather.approvedTime == undefined) {
                 res.render('index', {
                     weather: null,
@@ -46,7 +48,7 @@ app.post('/', (req, res) => {
                         for (var j = 0; j < tSerie.parameters.length; j++) {
                             var parameter = tSerie.parameters[j];
                             if (parameter.name == 't') {
-                                let weatherText = `It's ${parameter.values[0]} degrees in (${lat},${lon})!`;
+                                let weatherText = `It's ${parameter.values[0]}°C in (${lat}, ${lon})`;
                                 res.render('index', {
                                     weather: weatherText,
                                     error: null

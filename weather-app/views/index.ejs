@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Test</title>
+  <title>Weather</title>
   <link rel="stylesheet" type="text/css" href="/css/style.css">
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300' rel='stylesheet' type='text/css'>
 </head>
@@ -12,20 +12,48 @@
   <div class="container">
     <fieldset>
       <form action="/" method="post">
-        <input name="position" type="text" class="ghost-input" placeholder="Enter lon and lat (for example '57,11')" required>
+        <input id="input_position" name="position" type="text" class="ghost-input" placeholder="Enter lat and lon (for example '57, 11')"
+          required>
         <input type="submit" class="ghost-button" value="Get Weather">
       </form>
 
+      <input id="btn_position" type="button" class="ghost-button small" value="Get Position" onclick="getCurrentPosition();">
+
       <% if(weather !== null){ %>
-        <p><%= weather %></p>
+      <p>
+        <%= weather %>
+      </p>
       <% } %>
 
       <% if(error !== null){ %>
-        <p class='error'><%= error %></p>
+      <p class='error'>
+        <%= error %>
+      </p>
       <% } %>
 
-  </fieldset>
+      <p>
+        <div id="map"></div>
+      </p>
+
+    </fieldset>
   </div>
+
+  <script>
+    function getCurrentPosition() {
+      var x = document.getElementById("input_position");
+      if (navigator.geolocation) {
+
+        var showPosition = (position) => {
+          x.value = position.coords.latitude.toFixed(6) + ", " + position.coords.longitude.toFixed(6);
+        };
+
+        navigator.geolocation.getCurrentPosition(showPosition);
+      } else {
+        x.value = "Geolocation is not supported by this browser.";
+      }
+    }
+  </script>
+
 </body>
 
 </html>
